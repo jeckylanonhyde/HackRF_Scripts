@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Check if a file is provided
+if [[ $# -ne 1 || ! -f "$1" ]]; then
+    echo "Usage: $0 <logfile>"
+    exit 1
+fi
+
+LOG_FILE="$1"
+
+# Output summary
+echo "----------------------------------------------"
+echo "$LOG_FILE: $(wc -l < "$LOG_FILE") lines"
+
+# Count and summarize good frames
+echo "Good frames:"
+grep -v ERR "$LOG_FILE" | cut -d ' ' -f1 | sort | uniq -c | sed 's/://'
+echo "Total good frames: $(grep -vc ERR "$LOG_FILE")"
+
+# Count specific good frame types
+echo "IDA with CRC:OK: $(grep -c 'CRC:OK' "$LOG_FILE")"
+echo "IIP with FCS:OK: $(grep -c 'FCS:OK' "$LOG_FILE")"
+
+# Count and summarize bad frames
+echo "Bad frames:"
+grep ERR "$LOG_FILE" | cut -d ' ' -f1 | sort | uniq -c
+echo "Total bad frames: $(grep -c ERR "$LOG_FILE")"
+echo "----------------------------------------------"

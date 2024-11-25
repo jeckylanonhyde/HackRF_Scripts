@@ -1,0 +1,17 @@
+[default]
+name=Home
+lat= 33.951533
+lon=  -84.728753
+alt= 339
+
+[second]
+x=33.576
+y=84.4345
+z=348
+
+# name is optional
+# position is either:
+# - lat/lon in degrees
+# - alt in meters
+# or ECEF coordinates
+# - x/y/z in meters

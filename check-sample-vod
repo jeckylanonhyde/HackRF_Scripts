@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Check if input file is provided
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <input_file>"
+  exit 1
+fi
+
+INPUT_FILE="$1"
+
+# Process VOD and directly pipe into the decoder
+python3 vod-stitcher.py "$INPUT_FILE" | ir77_ambe_decode - /tmp/voice.wav

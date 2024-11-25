@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Ensure the input file is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <input_file>"
+    exit 1
+fi
+
+INPUT_FILE="$1"
+DFS_FILE="/tmp/voice.dfs"
+WAV_FILE="/tmp/voice.wav"
+
+# Convert bits to DFS format
+bits_to_dfs.py "$INPUT_FILE" "$DFS_FILE" || { echo "Failed to convert bits to DFS"; exit 1; }
+
+# Decode DFS to WAV
+if command -v ir77_ambe_decode >/dev/null 2>&1; then
+    ir77_ambe_decode "$DFS_FILE" "$WAV_FILE" || { echo "Failed to decode DFS to WAV"; exit 1; }
+else
+    echo "ir77_ambe_decode command not found. Please ensure it is installed."
+    exit 1
+fi
+
+# Play the WAV file using mplayer
+if command -v mplayer >/dev/null 2>&1; then
+    mplayer -msglevel all=3:statusline=5 -nolirc "$WAV_FILE"
+else
+    echo "mplayer command not found. Please ensure it is installed."
+    exit 1
+fi

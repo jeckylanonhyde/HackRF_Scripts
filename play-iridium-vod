@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Ensure the input file is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <input_file>"
+    exit 1
+fi
+
+INPUT_FILE="$1"
+DFS_FILE="/tmp/voice.dfs"
+WAV_FILE="/tmp/voice.wav"
+
+# Step 1: Stitch voice data into DFS format
+if command -v vod-stitcher.py >/dev/null 2>&1; then
+    vod-stitcher.py "$INPUT_FILE" "$DFS_FILE" || { echo "Failed to stitch voice data to DFS format"; exit 1; }
+else
+    echo "vod-stitcher.py command not found. Please ensure it is installed."
+    exit 1
+fi
+
+# Step 2: Decode DFS file to WAV
+if command -v ir77_ambe_decode >/dev/null 2>&1; then
+    ir77_ambe_decode "$DFS_FILE" "$WAV_FILE" || { echo "Failed to decode DFS to WAV"; exit 1; }
+else
+    echo "ir77_ambe_decode command not found. Please ensure it is installed."
+    exit 1
+fi
+
+# Step 3: Optionally process the DFS file with AMBE
+if command -v ambe >/dev/null 2>&1; then
+    ambe -w "$DFS_FILE" || echo "AMBE processing failed (non-critical)."
+else
+    echo "ambe command not found. Skipping optional processing step."
+fi
+
+# Step 4: Play the WAV file
+if command -v mplayer >/dev/null 2>&1; then
+    mplayer -msglevel all=3:statusline=5 -nolirc "$WAV_FILE" || { echo "Failed to play the WAV file"; exit 1; }
+else
+    echo "mplayer command not found. Please ensure it is installed."
+    exit 1
+fi
